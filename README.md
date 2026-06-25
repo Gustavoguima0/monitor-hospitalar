@@ -31,11 +31,11 @@ Sistema de monitoramento de equipamentos de rede (PCs, impressoras, câmeras) pa
 - [x] Etapa 4: Endpoint `/api/status` (ping em paralelo com `Promise.all`)
 - [x] Etapa 5: Servir arquivos estáticos do frontend
 - [x] Etapa 6: Frontend — HTML + CSS (mapa visual)
-- [ ] Etapa 7: Frontend — JavaScript (fetch + atualização automática)
-- [ ] Etapa 8: Testes com equipamentos reais da rede
+- [x] Etapa 7: Frontend — JavaScript (fetch + atualização automática)
+- [x] Etapa 8: Testes com equipamentos reais da rede
 - [ ] Etapa 9: Melhorias (WebSockets, histórico, SNMP, planta baixa)
  
- 
+
 ## Tecnologias
 
 - Node.js
