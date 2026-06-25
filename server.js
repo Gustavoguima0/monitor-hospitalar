@@ -5,6 +5,7 @@ const devices = require('./devices.json');
 const app = express();
 
 app.use(cors());
+app.use(express.static('public'));
 
 app.get('/api/status', async (req, res) => {
   const promises = devices.map(device => ping.promise.probe(device.ip, { timeout: 2 }));

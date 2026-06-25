@@ -1,0 +1,104 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+header {
+  padding: 16px 24px;
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+header h1 {
+  font-size: 20px;
+}
+
+header p {
+  font-size: 13px;
+  color: #999;
+  margin-top: 4px;
+}
+
+main {
+  display: flex;
+  height: calc(100vh - 70px);
+}
+
+/* Área do mapa: onde as bolinhas vão aparecer */
+#mapa {
+  flex: 1;
+  position: relative;
+  background-color: #161616;
+  background-image:
+    linear-gradient(#2a2a2a 1px, transparent 1px),
+    linear-gradient(90deg, #2a2a2a 1px, transparent 1px);
+  background-size: 40px 40px;
+  padding: 24px;
+}
+
+/* Cada bolinha de equipamento dentro do mapa */
+.equipamento-ponto {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 12px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.equipamento-ponto:hover {
+  transform: scale(1.1);
+}
+
+.online {
+  background-color: #2ecc71;
+  box-shadow: 0 0 12px #2ecc71;
+}
+
+.offline {
+  background-color: #e74c3c;
+  box-shadow: 0 0 12px #e74c3c;
+}
+
+/* Lista lateral de detalhes */
+#lista-detalhes {
+  width: 300px;
+  background-color: #2a2a2a;
+  padding: 16px;
+  overflow-y: auto;
+  border-left: 1px solid #3a3a3a;
+}
+
+#lista-detalhes h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+#lista-equipamentos {
+  list-style: none;
+}
+
+#lista-equipamentos li {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background-color: #333;
+  font-size: 13px;
+}
+
+#lista-equipamentos li .status-bolinha {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
