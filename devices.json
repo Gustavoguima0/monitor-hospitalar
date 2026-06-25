@@ -2,7 +2,7 @@
   {
     "nome": "Roteador (Gateway)",
     "ip": "192.168.1.20",
-    "tipo": "pc"
+    "tipo": "Roteador"
   },
   {
     "nome": "Meu PC",
@@ -12,7 +12,7 @@
   {
     "nome": "Meu Celular",
     "ip": "192.168.1.148",
-    "tipo": "pc"
+    "tipo": "celular"
   },
   {
     "nome": "Servidor Externo (Google DNS)",
