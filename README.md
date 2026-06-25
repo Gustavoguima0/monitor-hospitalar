@@ -10,15 +10,15 @@ Sistema de monitoramento de equipamentos de rede (PCs, impressoras, câmeras) pa
 │                                                            │
 │   ┌──────────────┐         ┌──────────────────────┐      │
 │   │  servidor.js  │  ping   │  Equipamentos reais   │      │
-│   │  (backend)    │ ──────► │  (PCs, impressoras,  │      │
+│   │               │ ──────► │  (PCs, impressoras,  │      │
 │   │               │ ◄────── │   câmeras na rede)    │      │
 │   └──────┬───────┘ resposta └──────────────────────┘      │
 │          │                                                │
 │          │  serve o endpoint /api/status                  │
 │          ▼                                                │
 │   ┌──────────────┐                                        │
-│   │   Navegador   │  busca /api/status a cada 5s          │
-│   │  (dashboard)  │  e desenha bolinhas verde/vermelha     │
+│   │               │  busca /api/status a cada 5s          │
+│   │  dashboard    │  e desenha bolinhas verde/vermelha     │
 │   └──────────────┘                                        │
 └─────────────────────────────────────────────────────────┘
 ```
