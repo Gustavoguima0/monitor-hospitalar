@@ -1,85 +1,96 @@
-// Pega referências aos elementos do HTML que vamos preencher
 const mapa = document.getElementById('mapa');
 const listaEquipamentos = document.getElementById('lista-equipamentos');
 const ultimaAtualizacao = document.getElementById('ultima-atualizacao');
 
-// Guarda qual equipamento (por IP) está com o histórico expandido no momento.
-// Fica fora da função de desenho para sobreviver aos redesenhos a cada 5s.
 let ipExpandido = null;
 
-// Busca os dados de status do backend
+// Guarda o controlador da requisição em andamento, pra poder cancelar
+// uma busca anterior se uma nova começar antes dela terminar.
+let controladorAtual = null;
+
 async function buscarStatus() {
-  const resposta = await fetch('/api/status');
-  const dados = await resposta.json();
-  return dados;
+  // Cancela qualquer requisição anterior ainda pendente
+  if (controladorAtual) {
+    controladorAtual.abort();
+  }
+  controladorAtual = new AbortController();
+
+  const resposta = await fetch('/api/status', { signal: controladorAtual.signal });
+  if (!resposta.ok) {
+    throw new Error(`Servidor respondeu com erro ${resposta.status}`);
+  }
+  return resposta.json();
 }
 
-// Busca o histórico de um equipamento específico
 async function buscarHistorico(ip) {
-  const resposta = await fetch(`/api/historico?ip=${ip}`);
-  const dados = await resposta.json();
-  return dados;
+  // encodeURIComponent protege contra IPs ou caracteres especiais
+  // que quebrariam a query string da URL
+  const resposta = await fetch(`/api/historico?ip=${encodeURIComponent(ip)}`);
+  if (!resposta.ok) {
+    throw new Error(`Servidor respondeu com erro ${resposta.status}`);
+  }
+  return resposta.json();
 }
 
-// Cria o bloco visual do histórico (lista de eventos) dentro do item
 async function criarPainelHistorico(ip) {
   const painel = document.createElement('div');
   painel.className = 'historico-painel';
   painel.textContent = 'Carregando histórico...';
 
-  const eventos = await buscarHistorico(ip);
+  try {
+    const eventos = await buscarHistorico(ip);
+    painel.innerHTML = '';
 
-  painel.innerHTML = ''; // limpa o "Carregando..."
+    if (eventos.length === 0) {
+      painel.textContent = 'Nenhuma queda ou recuperação registrada ainda.';
+      return painel;
+    }
 
-  if (eventos.length === 0) {
-    painel.textContent = 'Nenhuma queda ou recuperação registrada ainda.';
-    return painel;
+    const listaEventos = document.createElement('ul');
+    eventos.slice(0, 5).forEach(evento => {
+      const linha = document.createElement('li');
+      const cor = evento.status === 'online' ? '#2ecc71' : '#e74c3c';
+      linha.innerHTML = `<span style="color: ${cor}">●</span> `;
+      linha.append(`${evento.status === 'online' ? 'Voltou online' : 'Caiu (offline)'} em ${evento.timestamp}`);
+      listaEventos.appendChild(linha);
+    });
+    painel.appendChild(listaEventos);
+  } catch (erro) {
+    painel.textContent = 'Não foi possível carregar o histórico agora.';
   }
 
-  const listaEventos = document.createElement('ul');
-  // Mostra só os 5 eventos mais recentes, pra não poluir a tela
-  eventos.slice(0, 5).forEach(evento => {
-    const linha = document.createElement('li');
-    const cor = evento.status === 'online' ? '#2ecc71' : '#e74c3c';
-    linha.innerHTML = `<span style="color: ${cor}">●</span> `;
-    linha.append(`${evento.status === 'online' ? 'Voltou online' : 'Caiu (offline)'} em ${evento.timestamp}`);
-    listaEventos.appendChild(linha);
-  });
-
-  painel.appendChild(listaEventos);
   return painel;
 }
 
-// Alterna entre abrir/fechar o painel de histórico de um item
 async function alternarHistorico(item, ip) {
   const painelExistente = item.querySelector('.historico-painel');
 
   if (painelExistente) {
-    // já está aberto -> fecha
     painelExistente.remove();
     ipExpandido = null;
     return;
   }
 
-  // está fechado -> abre
   ipExpandido = ip;
   const painel = await criarPainelHistorico(ip);
-  item.appendChild(painel);
+
+  // Proteção extra: só anexa se o item ainda estiver na página
+  // e ainda não tiver um painel (evita duplicar em casos de corrida)
+  if (item.isConnected && !item.querySelector('.historico-painel')) {
+    item.appendChild(painel);
+  }
 }
 
-// Limpa e redesenha tudo na tela com base nos dados recebidos
 function desenharDashboard(equipamentos) {
   mapa.innerHTML = '';
   listaEquipamentos.innerHTML = '';
 
   equipamentos.forEach(equipamento => {
-    // --- Cria a bolinha no mapa ---
     const bolinha = document.createElement('div');
     bolinha.className = 'equipamento-ponto ' + (equipamento.online ? 'online' : 'offline');
     bolinha.title = equipamento.nome;
     mapa.appendChild(bolinha);
 
-    // --- Cria o item na lista lateral ---
     const item = document.createElement('li');
     item.style.cursor = 'pointer';
 
@@ -99,15 +110,15 @@ function desenharDashboard(equipamentos) {
     item.appendChild(statusBolinha);
     item.append(`${equipamento.nome} — ${equipamento.ip} — ${textoStatus}`);
 
-    // Clique no item alterna o painel de histórico
     item.addEventListener('click', () => alternarHistorico(item, equipamento.ip));
-
     listaEquipamentos.appendChild(item);
 
-    // Se esse equipamento estava marcado como expandido antes do redesenho,
-    // reabre o painel automaticamente
     if (ipExpandido === equipamento.ip) {
-      criarPainelHistorico(equipamento.ip).then(painel => item.appendChild(painel));
+      criarPainelHistorico(equipamento.ip).then(painel => {
+        if (item.isConnected && !item.querySelector('.historico-painel')) {
+          item.appendChild(painel);
+        }
+      });
     }
   });
 
@@ -116,8 +127,17 @@ function desenharDashboard(equipamentos) {
 }
 
 async function atualizarDashboard() {
-  const equipamentos = await buscarStatus();
-  desenharDashboard(equipamentos);
+  try {
+    const equipamentos = await buscarStatus();
+    desenharDashboard(equipamentos);
+  } catch (erro) {
+    if (erro.name === 'AbortError') {
+      // Cancelamento intencional (nova requisição substituiu esta) — ignora
+      return;
+    }
+    console.error('Erro ao atualizar o dashboard:', erro);
+    ultimaAtualizacao.textContent = 'Erro ao buscar dados do servidor. Tentando novamente...';
+  }
 }
 
 atualizarDashboard();
