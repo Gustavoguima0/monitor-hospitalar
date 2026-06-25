@@ -1,0 +1,32 @@
+[
+  {
+    "nome": "PC Recepção",
+    "ip": "192.168.1.10",
+    "tipo": "pc"
+  },
+  {
+    "nome": "PC Triagem",
+    "ip": "192.168.1.11",
+    "tipo": "pc"
+  },
+  {
+    "nome": "Impressora Sala 2",
+    "ip": "192.168.1.20",
+    "tipo": "impressora"
+  },
+  {
+    "nome": "Câmera Corredor",
+    "ip": "192.168.1.30",
+    "tipo": "camera"
+  },
+  {
+    "nome": "Servidor Local",
+    "ip": "8.8.8.8",
+    "tipo": "pc"
+  },
+  {
+    "nome": "Equipamento Offline (teste)",
+    "ip": "192.168.99.99",
+    "tipo": "pc"
+  }
+]
