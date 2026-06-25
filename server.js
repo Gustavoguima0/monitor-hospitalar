@@ -2,19 +2,18 @@ const express = require('express');
 const cors = require('cors');
 const ping = require('ping');
 const devices = require('./devices.json');
+const { registrarEvento, buscarHistorico } = require('./db');
 const app = express();
 
 app.use(cors());
 app.use(express.static('public'));
 
-// Quantas falhas consecutivas um equipamento precisa ter
-// antes de ser considerado realmente offline
 const LIMITE_FALHAS = 2;
-
-// Guarda o número de falhas consecutivas de cada equipamento, por IP.
-// Esse objeto vive fora da rota, então persiste entre uma chamada e outra
-// enquanto o servidor estiver rodando.
 const falhasConsecutivas = {};
+
+// Guarda o último status conhecido de cada equipamento (true/false),
+// pra sabermos se houve MUDANÇA de status entre uma checagem e outra
+const ultimoStatusConhecido = {};
 
 app.get('/api/status', async (req, res) => {
   const promises = devices.map(device => ping.promise.probe(device.ip, { timeout: 2 }));
@@ -24,15 +23,19 @@ app.get('/api/status', async (req, res) => {
     const respondeuAgora = resultados[index].alive;
 
     if (respondeuAgora) {
-      // Respondeu: zera o contador de falhas dele
       falhasConsecutivas[device.ip] = 0;
     } else {
-      // Não respondeu: incrementa o contador (ou começa em 1, se for a primeira falha)
       falhasConsecutivas[device.ip] = (falhasConsecutivas[device.ip] || 0) + 1;
     }
 
-    // Só é considerado offline "de verdade" se atingiu o limite de falhas
     const online = falhasConsecutivas[device.ip] < LIMITE_FALHAS;
+
+    // Detecta se houve mudança de status desde a última checagem
+    const statusAnterior = ultimoStatusConhecido[device.ip];
+    if (statusAnterior !== undefined && statusAnterior !== online) {
+      registrarEvento(device.nome, device.ip, online ? 'online' : 'offline');
+    }
+    ultimoStatusConhecido[device.ip] = online;
 
     return {
       nome: device.nome,
@@ -45,6 +48,15 @@ app.get('/api/status', async (req, res) => {
   });
 
   res.json(status);
+});
+
+// Novo endpoint: consulta o histórico registrado.
+// Uso: /api/historico            -> tudo
+//      /api/historico?ip=8.8.8.8 -> só de um equipamento
+app.get('/api/historico', (req, res) => {
+  const ip = req.query.ip || null;
+  const historico = buscarHistorico(ip);
+  res.json(historico);
 });
 
 const PORT = 3000;
