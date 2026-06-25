@@ -1,32 +1,27 @@
 [
   {
-    "nome": "PC Recepção",
-    "ip": "192.168.1.10",
-    "tipo": "pc"
-  },
-  {
-    "nome": "PC Triagem",
-    "ip": "192.168.1.11",
-    "tipo": "pc"
-  },
-  {
-    "nome": "Impressora Sala 2",
+    "nome": "Roteador (Gateway)",
     "ip": "192.168.1.20",
-    "tipo": "impressora"
+    "tipo": "pc"
   },
   {
-    "nome": "Câmera Corredor",
-    "ip": "192.168.1.30",
-    "tipo": "camera"
+    "nome": "Meu PC",
+    "ip": "192.168.1.124",
+    "tipo": "pc"
   },
   {
-    "nome": "Servidor Local",
+    "nome": "Meu Celular",
+    "ip": "192.168.1.148",
+    "tipo": "pc"
+  },
+  {
+    "nome": "Servidor Externo (Google DNS)",
     "ip": "8.8.8.8",
     "tipo": "pc"
   },
   {
-    "nome": "Equipamento Offline (teste)",
-    "ip": "192.168.99.99",
+    "nome": "Dispositivo Inexistente (teste offline)",
+    "ip": "192.168.1.250",
     "tipo": "pc"
   }
 ]
