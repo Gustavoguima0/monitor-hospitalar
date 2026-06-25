@@ -31,9 +31,15 @@ function desenharDashboard(equipamentos) {
     statusBolinha.className = 'status-bolinha';
     statusBolinha.style.backgroundColor = equipamento.online ? '#2ecc71' : '#e74c3c';
 
-    const textoStatus = equipamento.online
-      ? `Online (${equipamento.tempo}ms)`
-      : 'Offline';
+    let textoStatus;
+    if (!equipamento.online) {
+      textoStatus = 'Offline';
+    } else if (equipamento.tempo === 'unknown') {
+      // Está dentro da tolerância do debounce, mas a última checagem falhou
+      textoStatus = 'Verificando...';
+    } else {
+      textoStatus = `Online (${equipamento.tempo}ms)`;
+    }
 
     item.appendChild(statusBolinha);
     item.append(`${equipamento.nome} — ${equipamento.ip} — ${textoStatus}`);
