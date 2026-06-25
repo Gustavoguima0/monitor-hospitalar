@@ -102,3 +102,25 @@ main {
   border-radius: 50%;
   margin-right: 6px;
 }
+
+#lista-equipamentos li:hover {
+  background-color: #3a3a3a;
+}
+
+.historico-painel {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #444;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.historico-painel ul {
+  list-style: none;
+}
+
+.historico-painel li {
+  padding: 4px 0;
+  background: none;
+  margin-bottom: 0;
+}
