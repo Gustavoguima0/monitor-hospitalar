@@ -1,20 +1,27 @@
+const express = require('express');
+const cors = require('cors');
 const ping = require('ping');
+const devices = require('./devices.json');
+const app = express();
 
-async function testarOnline() {
-  console.log('Testando IP online (8.8.8.8)...');
-  const resultado = await ping.promise.probe('8.8.8.8');
-  console.log(resultado);
-}
+app.use(cors());
 
-async function testarOffline() {
-  console.log('\nTestando IP offline/inexistente (192.168.99.99)...');
-  const resultado = await ping.promise.probe('192.168.99.99', { timeout: 2 });
-  console.log(resultado);
-}
+app.get('/api/status', async (req, res) => {
+  const promises = devices.map(device => ping.promise.probe(device.ip, { timeout: 2 }));
+  const resultados = await Promise.all(promises);
 
-async function main() {
-  await testarOnline();
-  await testarOffline();
-}
+  const status = devices.map((device, index) => ({
+    nome: device.nome,
+    ip: device.ip,
+    tipo: device.tipo,
+    online: resultados[index].alive,
+    tempo: resultados[index].time
+  }));
 
-main();
+  res.json(status);
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
