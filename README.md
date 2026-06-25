@@ -33,8 +33,12 @@ Sistema de monitoramento de equipamentos de rede (PCs, impressoras, câmeras) pa
 - [x] Etapa 6: Frontend — HTML + CSS (mapa visual)
 - [x] Etapa 7: Frontend — JavaScript (fetch + atualização automática)
 - [x] Etapa 8: Testes com equipamentos reais da rede
-- [ ] Etapa 9: Melhorias (WebSockets, histórico, SNMP, planta baixa)
- 
+- [ ] Etapa 9: Melhorias
+  - [x] Debounce de falhas (evitar falso positivo em queda momentânea)
+  - [ ] Histórico de quedas (banco de dados)
+  - [ ] WebSockets (tempo real)
+  - [ ] Planta baixa real
+  - [ ] SNMP para impressoras
 
 ## Tecnologias
 
