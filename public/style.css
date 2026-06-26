@@ -67,6 +67,13 @@ main {
 .offline {
   background-color: #e74c3c;
   box-shadow: 0 0 12px #e74c3c;
+  animation: piscar 2s ease-in-out infinite;
+}
+
+@keyframes piscar {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.3; }
+  100% { opacity: 1; }
 }
 
 /* Lista lateral de detalhes */
