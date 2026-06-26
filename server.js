@@ -25,6 +25,7 @@ devices.forEach((device, index) => {
 
 const falhasConsecutivas = {};
 const ultimoStatusConhecido = {};
+const momentoDaQueda = {};
 
 // Cache do status mais recente — o endpoint /api/status só lê isso,
 // nunca dispara um ping novo. Só o loop abaixo escreve aqui.
@@ -50,13 +51,17 @@ async function verificarTodos() {
 
     const online = falhasConsecutivas[device.ip] < LIMITE_FALHAS;
 
-    // Só registra evento se já tínhamos um status anterior conhecido
-    // (evita "falso evento" na primeira checagem após o servidor iniciar)
     const statusAnterior = ultimoStatusConhecido[device.ip];
     if (statusAnterior !== undefined && statusAnterior !== online) {
       registrarEvento(device.nome, device.ip, online ? 'online' : 'offline');
+      if (!online) {
+        momentoDaQueda[device.ip] = new Date();
+      } else {
+        delete momentoDaQueda[device.ip];
+      }
     }
     ultimoStatusConhecido[device.ip] = online;
+
 
     return {
       nome: device.nome,
@@ -64,7 +69,8 @@ async function verificarTodos() {
       tipo: device.tipo,
       online,
       tempo,
-      falhasConsecutivas: falhasConsecutivas[device.ip]
+      falhasConsecutivas: falhasConsecutivas[device.ip],
+      quedaEm: momentoDaQueda[device.ip] || null
     };
   });
 }
@@ -91,7 +97,7 @@ verificarTodos().then(() => {
   setInterval(verificarTodos, INTERVALO_VERIFICACAO_MS);
 });
 
-// --- Encerramento gracioso ---
+
 // Garante que o banco SQLite seja fechado corretamente antes do processo
 // morrer, evitando corrupção em caso de Ctrl+C ou parada por systemd/Docker.
 function encerrarServidor() {

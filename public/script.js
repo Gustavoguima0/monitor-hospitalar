@@ -98,9 +98,17 @@ function desenharDashboard(equipamentos) {
     statusBolinha.className = 'status-bolinha';
     statusBolinha.style.backgroundColor = equipamento.online ? '#2ecc71' : '#e74c3c';
 
+
     let textoStatus;
     if (!equipamento.online) {
-      textoStatus = 'Offline';
+      if (equipamento.quedaEm) {
+        const agora = new Date();
+        const queda = new Date(equipamento.quedaEm);
+        const minutos = Math.floor((agora - queda) / 1000 / 60);
+        textoStatus = minutos === 0 ? 'Offline (menos de 1 min)' : `Offline há ${minutos} min`;
+      } else {
+        textoStatus = 'Offline';
+      }
     } else if (equipamento.tempo === 'unknown') {
       textoStatus = 'Verificando...';
     } else {
